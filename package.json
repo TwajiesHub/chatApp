@@ -7,7 +7,7 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "test": "node --test test/*.test.js",
-    "check": "node --check server.js && node --check public/app.js && node --check public/call.js && node --check public/sw.js",
+    "check": "node --check server.js && node --check public/app.js && node --check public/call.js && node --check public/sw.js && node --check origins.js",
     "test:browser": "playwright test",
     "format": "prettier --write ."
   },

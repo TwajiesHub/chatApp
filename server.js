@@ -1,4 +1,6 @@
 import express from "express";
+import { createOriginPolicy } from "./origins.js";
+const isAllowedOrigin = createOriginPolicy();
 import compression from "compression";
 import { WebSocketServer, WebSocket } from "ws";
 import { DatabaseSync } from "node:sqlite";
@@ -35,13 +37,24 @@ app.use((req, res, next) => {
     "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self' ws: wss:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'",
   );
   if (req.path.startsWith("/api")) res.setHeader("Cache-Control", "no-store");
+  const origin = req.headers.origin;
   if (
-    !["GET", "HEAD", "OPTIONS"].includes(req.method) &&
-    req.headers.origin &&
-    req.headers.origin !==
-      `${process.env.SECURE_COOKIE === "1" ? "https" : req.protocol}://${req.get("host")}`
-  )
+    origin &&
+    !isAllowedOrigin(origin) &&
+    !["GET", "HEAD"].includes(req.method)
+  ) {
     return res.status(403).json({ error: "Invalid origin" });
+  }
+  if (req.path.startsWith("/api")) {
+    res.vary("Origin");
+    if (origin && isAllowedOrigin(origin)) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+      res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, POST, OPTIONS");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    }
+    if (req.method === "OPTIONS") return res.sendStatus(204);
+  }
   next();
 });
 const publicUser = (u) => ({
@@ -96,12 +109,10 @@ app.post("/api/auth/:action", (req, res) => {
     password.length < 8 ||
     password.length > 128
   )
-    return res
-      .status(400)
-      .json({
-        error:
-          "Use a 3–24 character lowercase username and an 8–128 character password.",
-      });
+    return res.status(400).json({
+      error:
+        "Use a 3–24 character lowercase username and an 8–128 character password.",
+    });
   let user = db.prepare("SELECT * FROM users WHERE username=?").get(username);
   if (req.params.action === "register") {
     if (user) return res.status(409).json({ error: "Username already taken" });
@@ -348,16 +359,14 @@ app.get("/api/ice", auth, (req, res) => {
 app.use(express.static("public", { maxAge: 0 }));
 app.use((err, req, res, next) => {
   if (!err.status) console.error("Request failed:", err.message);
-  res
-    .status(err.status || 500)
-    .json({
-      error:
-        err.status === 413
-          ? "Upload too large"
-          : err.status === 400
-            ? "Invalid request"
-            : "Server error",
-    });
+  res.status(err.status || 500).json({
+    error:
+      err.status === 413
+        ? "Upload too large"
+        : err.status === 400
+          ? "Invalid request"
+          : "Server error",
+  });
 });
 const server = createServer(app);
 const wss = new WebSocketServer({ noServer: true, maxPayload: 64000 });
@@ -374,10 +383,7 @@ server.on("upgrade", (req, socket, head) => {
     url.pathname !== "/ws" ||
     !user ||
     !member(user.id, rid) ||
-    (req.headers.origin &&
-      !["http://" + req.headers.host, "https://" + req.headers.host].includes(
-        req.headers.origin,
-      ))
+    (req.headers.origin && !isAllowedOrigin(req.headers.origin))
   ) {
     socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
     return socket.destroy();

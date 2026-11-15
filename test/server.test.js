@@ -250,3 +250,63 @@ test("call capacity is four, malformed signaling does not crash server", async (
     for (const ws of sockets) ws.close();
   }
 });
+test("Render signup, credentialed CORS and signaling work behind an HTTP proxy", async () => {
+  const origin = "https://studylight-gg38.onrender.com";
+  const response = await fetch(base + "/api/auth/register", {
+    method: "POST",
+    headers: {
+      origin,
+      "content-type": "application/json",
+      "x-forwarded-proto": "https",
+    },
+    body: JSON.stringify({
+      username: "render_student",
+      password: "test-password-123",
+      name: "Render Student",
+      level: "SS1",
+    }),
+  });
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("access-control-allow-origin"), origin);
+  assert.equal(
+    response.headers.get("access-control-allow-credentials"),
+    "true",
+  );
+  assert.match(response.headers.get("vary"), /Origin/i);
+  const cookie = response.headers.get("set-cookie").split(";")[0];
+  const ws = new WebSocket(`ws://127.0.0.1:${port}/ws?room=study`, {
+    headers: { cookie, origin },
+  });
+  await waitMessage(ws, (m) => m.type === "welcome");
+  ws.close();
+  const preflight = await fetch(base + "/api/auth/register", {
+    method: "OPTIONS",
+    headers: {
+      origin,
+      "access-control-request-method": "POST",
+      "access-control-request-headers": "content-type",
+    },
+  });
+  assert.equal(preflight.status, 204);
+  assert.equal(preflight.headers.get("access-control-allow-origin"), origin);
+  for (const deniedOrigin of ["https://attacker.onrender.com", "null"]) {
+    const denied = await fetch(base + "/api/auth/register", {
+      method: "POST",
+      headers: { origin: deniedOrigin, "content-type": "application/json" },
+      body: "{}",
+    });
+    assert.equal(denied.status, 403);
+    assert.equal(denied.headers.get("access-control-allow-origin"), null);
+  }
+  const spoofed = await fetch(base + "/api/auth/login", {
+    method: "POST",
+    headers: {
+      origin: "https://attacker.example",
+      "x-forwarded-host": "attacker.example",
+      "x-forwarded-proto": "https",
+      "content-type": "application/json",
+    },
+    body: "{}",
+  });
+  assert.equal(spoofed.status, 403);
+});

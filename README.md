@@ -78,14 +78,23 @@ The browser's managed policy disables non-proxied UDP. Two-browser media was ver
 
 ## Configuration and deployment
 
-| Variable                                     | Default  | Purpose                                                                  |
-| -------------------------------------------- | -------- | ------------------------------------------------------------------------ |
-| `PORT`                                       | `3000`   | HTTP / WebSocket port                                                    |
-| `DATA_DIR`                                   | `./data` | Persistent SQLite directory; writable by the app                         |
-| `SECURE_COOKIE`                              | unset    | Set `1` behind production HTTPS to require secure cookies                |
-| `TURN_URL`, `TURN_USERNAME`, `TURN_PASSWORD` | unset    | Optional TURN binding; required for reliable restrictive-network calling |
+| Variable                                     | Default                                        | Purpose                                                                  |
+| -------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------ |
+| `PORT`                                       | `3000`                                         | HTTP / WebSocket port                                                    |
+| `DATA_DIR`                                   | `./data`                                       | Persistent SQLite directory; writable by the app                         |
+| `ALLOWED_ORIGINS`                            | Current Render URL + HTTP loopback on any port | Comma-separated trusted HTTP(S) origins; when set, replaces defaults     |
+| `SECURE_COOKIE`                              | unset                                          | Set `1` behind production HTTPS to require secure cookies                |
+| `TURN_URL`, `TURN_USERNAME`, `TURN_PASSWORD` | unset                                          | Optional TURN binding; required for reliable restrictive-network calling |
 
-Use one Node process and persist `DATA_DIR` on durable storage. The database holds users, sessions, chat, binary attachments, timer and scores. Back it up using SQLite's supported backup facilities; do not copy a live database without its WAL. Place a TLS reverse proxy in front and forward WebSocket upgrades. The proxy should preserve the external Host and strip untrusted forwarded headers. The application checks mutation and WebSocket origins. HTTPS origin validation supports the external secure origin when `SECURE_COOKIE=1`. Do not open this pilot publicly without deployment hardening.
+Use one Node process and persist `DATA_DIR` on durable storage. The database holds users, sessions, chat, binary attachments, timer and scores. Back it up using SQLite's supported backup facilities; do not copy a live database without its WAL. Place a TLS reverse proxy in front and forward WebSocket upgrades. The proxy should preserve the external Host and strip untrusted forwarded headers. The application checks mutation and WebSocket origins. HTTP API mutations, CORS preflights and WebSocket upgrades share the same origin allowlist, independently of `SECURE_COOKIE` and the internal proxy protocol. By default it accepts `https://studylight-gg38.onrender.com` and HTTP `localhost`, `127.0.0.1` and `[::1]` on any port. Render's `RENDER_EXTERNAL_URL`, when present, also adds the exact URL of this service to the defaults, accommodating a future service hostname without trusting every `*.onrender.com` site.
+
+To override the defaults, set a comma-separated list in Render's environment settings (then redeploy):
+
+```sh
+ALLOWED_ORIGINS='http://localhost:3000,http://localhost:3100,https://studylight-gg38.onrender.com'
+```
+
+Include every origin you need when overriding: the configured list replaces all defaults, including local development and `RENDER_EXTERNAL_URL`. Use scheme + hostname + optional port; a trailing slash is accepted, but paths, wildcard domains, `null` and malformed origins are rejected. An empty list denies all browser origins. Origins are not inferred from untrusted Host or forwarded headers. Allowed origins receive credentialed CORS headers; other origins cannot mutate state or open authenticated WebSockets. Requests without an Origin header retain the existing CLI/native-client behaviour. The browser app still uses same-origin API requests and SameSite=Strict cookies; this does not turn cross-site cookie sessions into a supported deployment topology. Do not open this pilot publicly without deployment hardening.
 
 ## Deliberate MVP limits
 
