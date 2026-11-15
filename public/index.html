@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#173d33" />
+    <meta
+      name="description"
+      content="A lighter way to learn together. Chat, share notes and study with classmates."
+    />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/style.css" />
+    <title>StudyLight · Learn together, use less</title>
+  </head>
+  <body>
+    <section id="auth-screen" class="auth-screen">
+      <div class="auth-story">
+        <a class="brand" href="/"
+          >▧ <span>StudyLight<span class="brand-dot">.</span></span></a
+        >
+        <div>
+          <span class="eyebrow">SMALL DATA. BIG POSSIBILITIES.</span>
+          <h1>Your people.<br />Your pace.<br /><em>Your potential.</em></h1>
+          <p>
+            A little space to ask questions, share what you know, and get
+            through school together.
+          </p>
+          <div class="story-tags">
+            <span>Built for Nigerian students</span
+            ><span>Made for mobile data</span>
+          </div>
+        </div>
+        <small>Less scrolling. More understanding.</small>
+      </div>
+      <div class="auth-form-wrap">
+        <span class="eyebrow">LET’S GET LEARNING</span>
+        <h2 id="auth-title">Welcome to your study space.</h2>
+        <p class="muted">Good questions start here.</p>
+        <div class="segmented">
+          <button id="register-tab" class="selected">Create account</button
+          ><button id="login-tab">Sign in</button>
+        </div>
+        <form id="auth-form">
+          <label
+            >Username<input
+              name="username"
+              required
+              pattern="[a-z0-9_]{3,24}"
+              placeholder="e.g. ada_okafor"
+              autocomplete="username"
+              minlength="3"
+              maxlength="24" /></label
+          ><label
+            >Password<input
+              name="password"
+              type="password"
+              required
+              minlength="8"
+              maxlength="128"
+              placeholder="At least 8 characters"
+              autocomplete="new-password"
+          /></label>
+          <div id="register-fields">
+            <label
+              >Your name<input
+                name="name"
+                maxlength="60"
+                placeholder="What should we call you?"
+                required
+                autocomplete="name"
+            /></label>
+            <div class="form-grid">
+              <label
+                >Class level<select name="level">
+                  <option>JSS1</option>
+                  <option>JSS2</option>
+                  <option>JSS3</option>
+                  <option selected>SS1</option>
+                  <option>SS2</option>
+                  <option>SS3</option>
+                </select></label
+              ><label
+                >School <span class="muted">(optional)</span
+                ><input name="school" maxlength="100" placeholder="Your school"
+              /></label>
+            </div>
+          </div>
+          <p id="auth-error" role="alert" class="error"></p>
+          <button class="primary wide" id="auth-submit">
+            Create my account <span>↗</span>
+          </button>
+        </form>
+        <p class="auth-foot">
+          No email needed. Keep your password safe — password recovery isn’t
+          available in this MVP.
+        </p>
+      </div>
+    </section>
+    <div id="app" hidden>
+      <aside class="sidebar">
+        <a class="brand" href="/"
+          >▧ <span>StudyLight<span class="brand-dot">.</span></span></a
+        ><span class="nav-caption">YOUR LEARNING SPACE</span>
+        <nav>
+          <button data-page="study" class="active">
+            <span>◫</span> Study room <i class="live-dot"></i></button
+          ><button data-page="chats"><span>☏</span> Messages</button
+          ><button data-page="resources"><span>▤</span> My resources</button
+          ><button data-page="quiz"><span>◇</span> Quick quiz</button
+          ><button data-page="leaderboard"><span>♧</span> Leaderboard</button>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="data-card">
+            <div>
+              <span class="leaf">⌁</span><strong>Every MB matters.</strong>
+            </div>
+            <p>Smaller files. Lighter calls.<br />More room to learn.</p>
+            <label class="toggle-line"
+              >Low-data mode
+              <input
+                id="low-data"
+                type="checkbox"
+                checked
+                role="switch" /></label
+            ><small id="data-mode-label">On · video capped at Low</small>
+          </div>
+          <button id="profile-button" class="profile">
+            <span class="avatar" id="avatar">A</span
+            ><span
+              ><strong id="profile-name"></strong
+              ><small id="profile-level"></small></span
+            ><span class="exit">↪</span>
+          </button>
+        </div>
+      </aside>
+      <main>
+        <header class="topbar">
+          <span id="breadcrumb">Your space <span>/</span> Study room</span>
+          <div class="connection">
+            <span id="connection-dot" class="live-dot"></span
+            ><span id="connection-text">Connecting…</span
+            ><button id="sign-out" class="sign-out">Sign out</button>
+          </div>
+        </header>
+        <div class="main-inner">
+          <div class="page-heading">
+            <div>
+              <span class="eyebrow" id="page-eyebrow">BETTER, TOGETHER</span>
+              <h1 id="page-title">
+                A little focus goes a long way<span>.</span>
+              </h1>
+              <p class="muted" id="page-description">
+                Pull up a chair. Your next “I get it!” is closer than you think.
+              </p>
+            </div>
+            <span class="date-chip">✦ &nbsp; One step at a time</span>
+          </div>
+          <section id="study-page" class="page">
+            <div class="room-layout">
+              <div class="room-main">
+                <div class="room-banner">
+                  <div class="room-icon">◫</div>
+                  <div>
+                    <span class="eyebrow">THE SHARED STUDY ROOM</span>
+                    <h2>SS study circle</h2>
+                    <p>All classes welcome · Chat, focus & figure it out</p>
+                  </div>
+                  <span class="pill">OPEN ROOM</span>
+                </div>
+                <div class="chat-card">
+                  <div class="chat-header">
+                    <strong id="chat-title">The conversation</strong
+                    ><span id="chat-subtitle"
+                      >A good question helps everyone.</span
+                    >
+                  </div>
+                  <div id="messages" class="messages" aria-live="polite"></div>
+                  <div
+                    id="attachment-preview"
+                    class="attachment-preview"
+                    hidden
+                  ></div>
+                  <form id="message-form" class="composer">
+                    <button
+                      type="button"
+                      id="attach-button"
+                      class="icon-button"
+                      aria-label="Attach image or PDF"
+                    >
+                      ＋</button
+                    ><input
+                      id="message-input"
+                      placeholder="Ask a question or share an idea…"
+                      maxlength="2000"
+                      autocomplete="off"
+                      aria-label="Message"
+                    /><button
+                      type="button"
+                      id="record-button"
+                      class="icon-button"
+                      aria-label="Record voice note"
+                    >
+                      ♩</button
+                    ><button class="send-button" aria-label="Send message">
+                      ↑</button
+                    ><input
+                      type="file"
+                      id="file-input"
+                      accept="image/*,application/pdf"
+                      hidden
+                    />
+                  </form>
+                  <div class="composer-foot">
+                    <span id="composer-status"
+                      >Text first. A little data goes a long way.</span
+                    ><span>↵ to send</span>
+                  </div>
+                </div>
+              </div>
+              <aside class="room-aside">
+                <div class="focus-card">
+                  <div class="card-kicker">
+                    <span>◷ &nbsp; FOCUS TIMER</span
+                    ><span class="pill">SHARED</span>
+                  </div>
+                  <div class="timer" id="timer">25<span>:</span>00</div>
+                  <p>
+                    One focused session.<br />A little closer to your goals.
+                  </p>
+                  <button id="timer-button" class="primary wide">
+                    ▷ &nbsp; Start a focus session</button
+                  ><small>25 minutes · synced for everyone</small>
+                </div>
+                <div class="call-card">
+                  <span class="eyebrow">FACES MAKE IT EASIER</span>
+                  <h3>Talk it through.</h3>
+                  <p>
+                    Stuck on a question? Jump into a small call with your study
+                    circle.
+                  </p>
+                  <div class="call-facts">
+                    <span>Up to 4 people</span
+                    ><span>Low quality by default</span>
+                  </div>
+                  <button id="prepare-call" class="outline wide">
+                    ▣ &nbsp; Set up a call
+                  </button>
+                  <div class="mini-note">
+                    ⌁ &nbsp; You choose how much data to use.
+                  </div>
+                </div>
+                <div class="kind-note">
+                  <span>✳</span>
+                  <p>
+                    <strong>A little kindness goes far.</strong><br />Ask
+                    freely. Help generously. Keep personal details to yourself.
+                  </p>
+                </div>
+              </aside>
+            </div>
+            <div class="bottom-note">
+              <span>⌁</span> Built for your bandwidth. Recent chats stay
+              available offline on this device.
+            </div>
+          </section>
+          <section id="chats-page" class="page" hidden>
+            <div class="section-toolbar">
+              <h2>Your conversations</h2>
+              <button id="new-chat" class="primary">＋ New conversation</button>
+            </div>
+            <div id="room-list" class="tile-grid"></div>
+            <div id="chat-mount"></div>
+          </section>
+          <section id="resources-page" class="page" hidden>
+            <div class="info-banner">
+              ↓ Resources download only when you choose. Save notes, images and
+              voice notes from a chat to use offline.
+            </div>
+            <div id="resource-list" class="tile-grid"></div>
+          </section>
+          <section id="quiz-page" class="page" hidden>
+            <div class="quiz-card">
+              <span class="eyebrow">A SMALL WIN FOR TODAY</span>
+              <h2>The three-question warm-up</h2>
+              <p class="muted">
+                Maths, science and English. Your best score counts.
+              </p>
+              <form id="quiz-form"></form>
+              <div id="quiz-result" role="status"></div>
+            </div>
+          </section>
+          <section id="leaderboard-page" class="page" hidden>
+            <div class="quiz-card">
+              <span class="eyebrow">PROGRESS WORTH CELEBRATING</span>
+              <h2>The learning board</h2>
+              <p class="muted">Best warm-up scores · out of 3</p>
+              <div id="leaders"></div>
+            </div>
+          </section>
+        </div>
+        <footer>
+          <span
+            >StudyLight <span class="brand-dot">✳</span> A lighter way to
+            learn.</span
+          ><span>Made for curious minds.</span>
+        </footer>
+      </main>
+    </div>
+    <dialog id="call-dialog">
+      <div class="dialog-header">
+        <span class="eyebrow">YOUR CALL, YOUR DATA</span
+        ><button class="icon-button" id="close-call-dialog" aria-label="Close">
+          ×
+        </button>
+      </div>
+      <h2>Let’s talk it through.</h2>
+      <p class="muted">Up to 4 people. Everyone joins the same room.</p>
+      <label
+        >Call quality<select id="pre-quality">
+          <option value="low">Low · 180p / 10 fps</option>
+          <option value="medium">Medium · 360p / 15 fps</option>
+          <option value="high">High · 720p / 24 fps</option>
+        </select></label
+      ><label class="check-line"
+        ><input id="pre-video" type="checkbox" checked /> Start with
+        video</label
+      >
+      <div class="estimate">
+        <strong id="pre-estimate"></strong>
+        <p>
+          10-minute estimate per connection, upload + download. Group calls
+          multiply this by the number of other people. Actual use varies.
+        </p>
+      </div>
+      <p id="relay-notice" class="muted"></p>
+      <p id="call-error" class="error" role="alert"></p>
+      <button id="join-call" class="primary wide">Join call</button>
+    </dialog>
+    <section id="call-panel" class="call-panel" hidden>
+      <div class="call-panel-header">
+        <div>
+          <span class="live-dot"></span> <strong>Study call</strong
+          ><small id="call-status">Connecting…</small>
+        </div>
+        <span id="call-bitrate">0 kbps</span>
+      </div>
+      <div id="video-grid" class="video-grid">
+        <div class="video-tile">
+          <video id="local-video" autoplay playsinline muted></video
+          ><span>You</span>
+        </div>
+      </div>
+      <div class="call-controls">
+        <button id="toggle-mic">Mute mic</button
+        ><button id="toggle-video">Voice only</button
+        ><select id="live-quality" aria-label="Call quality">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option></select
+        ><button id="leave-call" class="danger">Leave</button>
+      </div>
+      <small id="call-adaptation"
+        >Quality adapts automatically to network conditions.</small
+      >
+    </section>
+    <dialog id="new-chat-dialog">
+      <div class="dialog-header">
+        <h2>Find your study people.</h2>
+        <button id="close-chat-dialog" class="icon-button" aria-label="Close">
+          ×
+        </button>
+      </div>
+      <form id="new-chat-form">
+        <label
+          >Conversation name<input
+            name="name"
+            required
+            maxlength="60"
+            placeholder="e.g. Maths revision"
+        /></label>
+        <p class="muted">
+          Pick 1 classmate for a private chat, or up to 5 for a group.
+        </p>
+        <div id="people-list"></div>
+        <button class="primary wide">Create conversation</button>
+      </form>
+    </dialog>
+    <div id="toast" class="toast" role="status" hidden></div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
